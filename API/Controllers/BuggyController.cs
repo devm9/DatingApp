@@ -16,8 +16,7 @@ namespace API.Controllers
         public ActionResult<string> GetSecret(){
             return "secret text";
         }
-
-        [Authorize]
+        
         [HttpGet("not-found")]
         public ActionResult<string> GetNotFound(){
             var thing = _context.Users.Find(-1);
