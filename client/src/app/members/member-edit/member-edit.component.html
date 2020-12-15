@@ -52,11 +52,8 @@
                     </div>
                 </form>                
             </tab>
-            <tab heading='Interests'>
-                <h4>Interests</h4>
-                <p>{{member.interests}}</p>
-                <h4>Looking for</h4>
-                <p>{{member.lookingFor}}</p>
+            <tab heading='Edit Photos'>                
+                <app-photo-editor [member]="member"></app-photo-editor>>
             </tab>            
         </tabset>
     </div>

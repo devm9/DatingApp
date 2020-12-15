@@ -11,11 +11,11 @@ export class AppComponent implements OnInit {
   title = 'The Dating App';
   users: any;
 
-  constructor(private accountService: AccountService){    
+  constructor(private accountService: AccountService, private spinner: NgxSpinnerService){    
   }
 
   ngOnInit() {    
-    this.setCurrentUser();
+    this.setCurrentUser();  
   }
 
   setCurrentUser(){
