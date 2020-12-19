@@ -10,6 +10,8 @@ using API.DTOs;
 using AutoMapper;
 using System.Security.Claims;
 using API.Extensions;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -53,7 +55,7 @@ namespace API.Controllers
             return BadRequest("Failed to update user");
         }
 
-        [HttpPut("add-photo")]
+        [HttpPost("add-photo")]
         public async Task<ActionResult<PhotoDto>> AddPhoto(IFormFile file){
             var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
 
@@ -67,7 +69,7 @@ namespace API.Controllers
                 PublicId = result.PublicId
             };
 
-            if(user.Photos.Count = 0)
+            if(user.Photos.Count == 0)
             {
                 photo.IsMain = true;
             }
@@ -87,7 +89,7 @@ namespace API.Controllers
         public async Task<ActionResult> SetMainPhoto(int photoId){
             var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
 
-            var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+            var photo = user.Photos.SingleOrDefault(x => x.Id == photoId);
 
             if(photo.IsMain) return BadRequest("This is already your main photo");
 
@@ -114,13 +116,15 @@ namespace API.Controllers
 
             if(photo.PublicId != null)
             {
-                await _photoService.DeletePhotoAsync(photo.PublicId);
+                var result = await _photoService.DeletePhotoAsync(photo.PublicId);
                 if(result.Error != null) return BadRequest(result.Error.Message);                
             }
 
             user.Photos.Remove(photo);
 
             if(await _userRepository.SaveAllAsync()) return Ok();
+
+            return BadRequest("Failed to delete");
         }
     }
 }
