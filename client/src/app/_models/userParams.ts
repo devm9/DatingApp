@@ -1,6 +1,6 @@
 import { User } from './user';
 
-export class UserParams {
+export class UserParams : PaginationParams {
     gender: string;
     minAge = 18;
     maxAge = 99;
