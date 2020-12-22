@@ -1,4 +1,10 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using API.Interfaces;
+using API.Helpers;
+using API.DTOs;
 
 namespace API.Controllers
 {
@@ -20,7 +26,7 @@ namespace API.Controllers
             var likedUserId = await _userRepository.GetUserByUsernameAsync(username);
             var sourceUser = await _userRepository.GetUserWithLikes(sourceUserId);
 
-            if(likedUserId === null) return NotFound();
+            if(likedUserId == null) return NotFound();
 
             if(sourceUser.UserName == username) return BadRequest("You cannot like yourself");
 

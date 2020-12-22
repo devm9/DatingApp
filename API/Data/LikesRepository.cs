@@ -1,5 +1,8 @@
 using API.Interfaces;
 using API.Helpers;
+using API.DTOs;
+using System.Threading.Tasks;
+using API.Entities;
 
 namespace API.Data
 {
@@ -17,10 +20,10 @@ namespace API.Data
         public Task<AppUser> GetUserWithLikes(int userId){
             return await _context.Users
             .Include(x => x.LikedUsers)
-            .FirstOrDefaultAsync(x => x.Id == userId);
+            .SingleOrDefaultAsync(x => x.Id == userId);
         }
 
-        public Task<PagedList<LikeDto>> GetUserLikes(LikesParams: likesParams){
+        public Task<PagedList<LikeDto>> GetUserLikes(LikesParams likesParams){
             var users = _context.Users.OrderBy(u => u.UserName).AsQueryable();
             var likes = _context.Likes.AsQueryable();
 
@@ -44,7 +47,7 @@ namespace API.Data
                 Id = user.Id
             });
 
-            return await PagedList<LikeDto>.CreateAsync(likedUsers, likesParams.PageNumber, likesParams.PageSize)
+            return await PagedList<LikeDto>.CreateAsync(likedUsers, likesParams.PageNumber, likesParams.PageSize);
         }
     }
 }

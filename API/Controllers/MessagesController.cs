@@ -1,8 +1,11 @@
 using System.Threading.Tasks;
-using API.Dtos;
+using API.DTOs;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using API.Helpers;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 namespace API.Controllers
 {
@@ -12,6 +15,7 @@ namespace API.Controllers
         private readonly IMessageRepository _messageRepository;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+
         public MessagesController(IUserRepository userRepository, IMessageRepository messageRepository, IMapper mapper){
             _mapper = mapper;
             _userRepository = userRepository;
@@ -37,7 +41,7 @@ namespace API.Controllers
                 SenderUsername = sender.username,
                 RecipientUsername = recipient.username,
                 Content = createMessageDto.Content
-            }
+            };
 
             _messageRepository.AddMessage(message);
 
@@ -47,7 +51,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageForUser([FromQuery] MessageParams messageParams){
+        public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageForUser([FromQuery]MessageParams messageParams){
             messageParams.Username = User.GetUsername();
 
             var messages = await _messageRepository.GetMessagesForUser(messageParams);
@@ -58,10 +62,10 @@ namespace API.Controllers
         }
 
         [HttpGet("thread/{username}")]
-        public async Task<ActionResult<IEnumerable>> GetMessageThread(string username){
+        public async Task<ActionResult> GetMessageThread(string username){
             var currentUsername = User.GetUsername();
 
-            return Ok(await _messageRepository.GetMessageThread(currentUsername, username))
+            return Ok(await _messageRepository.GetMessageThread(currentUsername, username));
         }
 
         [HttpDelete("{id}")]
