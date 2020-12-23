@@ -41,14 +41,12 @@ namespace API.Data
 
             query = messageParams.Container switch
             {
-                "Inbox" => query.Where(u => u.Recipient.UserName == messageParams.Username && u.RecipientDeleted == false),
-                "Outbox" => query.Where(u => u.Sender.UserName == messageParams.Username && u.SenderDeleted == false),
-                _ => query.Where(u => u.Recipient.UserName == messageParams.Username && u.RecipientDeleted == false && u.DateRead == null)                
-            };
+                "Inbox" => query.Where(u => u.RecipientUserName == messageParams.Username && u.RecipientDeleted == false),
+                "Outbox" => query.Where(u => u.SenderUserName == messageParams.Username && u.SenderDeleted == false),
+                _ => query.Where(u => u.RecipientUserName == messageParams.Username && u.RecipientDeleted == false && u.DateRead == null)                
+            };            
 
-            var messages = query.ProjectTo<MessageDto<(_mapper.ConfigurationProvider);
-
-            return await PagedList<Message>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
+            return await PagedList<Message>.CreateAsync(query, messageParams.PageNumber, messageParams.PageSize);
         }
 
         public Task<IEnumerable<MessageDto>> GetMessageThread(string currentUsername, string recipientUsername){
@@ -60,6 +58,7 @@ namespace API.Data
             || m.Recipient.UserName == recipientUsername
             && m.Sender.UserName == currentUsername && m.SenderDeleted == false )
             .OrderBy(m => m.MessageSent)
+            .ProjectTo<MessageDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
             var unreadMessages = messages.Where(m => m.DateRead == null && m.Recipient.UserName == currentUsername).ToList();
@@ -70,20 +69,16 @@ namespace API.Data
                     message.DateRead = DateTime.UtcNow;
                 }
 
-                await _context.SaveChangesAsync();
+                
             }
 
-            return _mapper.Map<IEnumerable<MessageDto>>(messages);
+            return messages;
         }
 
         public Task<Group> GetGroupForConnection(string connectionId){
             return await _context.Groups.Include(c => c.Connections)
             .Where(c => c.Connections.Any(x => x.ConnectionId == connectionId))
             .FirstOrDefaultAsync();
-        }
-
-        public async Task<bool> SaveAllAsync(){
-            return await _context.SaveChangesAsync() > 0;
         }
 
         public void AddGroup(Group group){
